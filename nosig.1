@@ -1,0 +1,541 @@
+.\" Written by Mike Frysinger <vapier@gmail.com>
+.\" Released into the public domain.
+.TH NOSIG 1
+.SH NAME
+nosig \- run a program with specified signals blocked
+
+.SH SYNOPSIS
+.nf
+.BR nosig " [\fIoptions\fR...] [\fI--\fR] \fIprogram\fR [\fIarguments\fR...]"
+.BR nosig " [\fI--ignore|--default\fR] \fIsigspec\fR [...] \fIprogram\fR [...]"
+.BR nosig " [\fI--add|--del\fR] \fIsigspec\fR [\fI--block|--unblock|--set\fR] [...] \fIprogram\fR [...]"
+.fi
+
+.SH DESCRIPTION
+The
+.B nosig
+program is used to quickly manage signal dispositions and the signal block mask.
+These are distinct settings, although most users will not care about the
+difference.
+
+If you're familiar with the
+.BR nohup (1)
+program, then
+.B nosig
+is like that but way more flexible.
+The equivalent to `nohup ...` is `nosig --ignore SIGHUP ...`.
+That is,
+.BR nohup (1)
+ignores
+.I SIGHUP
+by setting its signal disposition to
+.I SIG_IGN
+before executing the specified program.
+It does not add the signal to the signal block mask.
+
+Most users will be able to accomplish what they want using only the
+.BR \-\-ignore
+option.
+That will run programs with specific signals initially ignored.
+
+.B nosig
+options operate as a state machine that take effect immediately.
+That means later options will always override earlier options, and all options
+may be combined as needed.
+This allows you to quickly reason about behavior as well as fully set up known
+states including fully resetting signal dispositions or the signal block mask.
+
+Changing the signal block mask is a fairly advanced topic, and most users can
+skip over those options the vast majority of the time.
+They might be useful as a fallback when dealing with a particularly stubborn
+program; see the
+.B Signal block mask management
+and
+.B Example
+sections below for more details.
+
+.SS Resetting state
+.B nosig
+offers a bunch of options to quickly reset all signal state.
+Specifically,
+.I \-\-reset
+will reset all signal dispositions & block masks.
+This can help when trying to debug a setup where signals are being initialized
+incorrectly and you want to guarantee good state before running another tool.
+
+If you need a little more fine-grained selection, a variety of
+.I \-\-xxx\-all
+options are available.
+This way you don't have to verbosely list out every possible signal yourself.
+
+.SS Signal specifications (sigspec)
+tl;dr: Use names like
+.I SIGINT
+or
+.IR SIGTERM
+to specify signals.
+
+.B nosig
+options operate on a simple specification
+.RI "(a.k.a. a " sigspec ")."
+
+These are symbolic signal names (strongly preferred),
+or system-specific numbers (strongly discouraged).
+The symbolic names are portable across systems while the numbers might not be
+stable even on the current system.
+This is due to signal handling in the system itself, not anything under the
+control of
+.BR nosig .
+Support for numbers is largely a fallback if the symbolic signal is unknown
+on your system.
+
+Most people will use common signal names like
+.IR SIGINT ","
+or omit the leading
+.I SIG
+prefix and simply use
+.IR INT "."
+
+For realtime signals, you'll want to use the names
+.BR SIGRTMIN " and " SIGRTMAX
+with offsets like
+.BR SIGRTMIN+1 " or " SIGRTMAX-1 .
+
+The set of
+.I sigspecs
+that
+.B nosig
+supports can be displayed with the
+.I \-\-list
+option.
+
+.SS Standard vs realtime signals
+If you're not familiar with realtime signals, then you most likely can
+completely ignore them!
+
+The signals users are most familiar with and utilize on a daily basis are the
+standard signals (or simply just "signals").
+These have the signal names you're used to seeing like
+.BR SIGINT " or " SIGTERM .
+
+Realtime signals on the other hand only have two named signal bases, and all
+signals are derived from those as offsets.
+Those are
+.BR SIGRTMIN " and " SIGRTMAX .
+Programs will then define their own internal names & uses for signals like
+.BR SIGRTMIN " and " SIGRTMIN+1
+(since POSIX only defines realtime signals as a range).
+That is why
+.B nosig
+uses those naming conventions -- they hopefully align well with whatever
+program you're working with.
+
+Keep in mind that, while the standard signals have names that reflect their
+meaning & intended use, the realtime signals have no predefined meaning.
+So the only way to know how a specific realtime signal
+.RB "(e.g. " SIGRTMIN+5 ")"
+is used, or whether it's used at all, is entirely specific to a program.
+
+The
+.B \-\-ignore-all
+and
+.B \-\-block-all
+options will operate on all standard & realtime signals as a default.
+Additional flags are provided to select the respective subsets.
+
+.SS Signal block mask management
+The signal block mask is used to block delivery of signals without having to
+change their signal disposition or handlers.
+Many programs never register handlers for signals, so simply changing their
+dispositions (using
+.BR \-\-ignore ")"
+is sufficient for most users to effectively "block a signal" for a program.
+
+If you have a program that registers a signal handler for a signal that you're
+trying to block, then attempts to use
+.B \-\-ignore
+will be overridden (see the
+.B Locking signal settings
+section below for more details).
+In that case, blocking the signal using the signal block mask might work.
+
+The signal set options
+.RB "(" \-\-add ", " \-\-del ", " \-\-empty ", " \-\-fill ", " \-\-block ", " \-\-unblock ", " \-\-set ")"
+operate on a single signal set.
+The signal set always starts off empty.
+Using
+.B \-\-empty
+as the first option would be redundant, but you might prefer it for clarity.
+
+You then modify the signal set (adding, deleting, clearing, filling signals)
+before using the signal set (blocking, unblocking, setting signals).
+You may repeat these series of actions (modify, use, reset) as many times as
+makes sense for your setup;
+.B nosig
+has no limit here.
+
+For example, you might want to block a few signals, unblock a few signals,
+but leave all the rest unchanged.
+You would modify the set
+.RB "(e.g. " \-\-add " multiple times),"
+use the set
+.RB "(e.g. " \-\-block "),"
+reset the set
+.RB "(e.g. " \-\-empty "),"
+modify the set
+.RB "(e.g. " \-\-add " multiple times),"
+then use the set again
+.RB "(e.g. " \-\-unblock ")."
+
+If you want the inverse behavior (only unblocking one or two signals), then you
+probably want to take the opposite approach by adding all signals to the set
+.RB "(e.g. " \-\-fill "),"
+removing the few signals you care about
+.RB "(e.g. " \-\-del " multiple times),"
+and then setting the signal block mask
+.RB "(e.g. " \-\-set ")."
+
+.SH OPTIONS
+
+.SS Generic options
+
+.TP
+.BR \-\-reset
+Unblock all signals and reset to their default dispositions.
+
+.TP
+.BR \-v ", " \-\-verbose
+Display verbose output/warnings that are normally safe to ignore.
+Specifying this more than once tends to make things more verbose.
+
+.SS Signal disposition (signal(2)) options
+
+.TP
+.BR \-I ", " \-\-ignore " "\fIsigspec\fR
+Set the signal disposition to ignore.
+.br
+See
+.I SIG_IGN
+in
+.BR signal (2)
+for more details.
+
+.TP
+.BR \-\-ignore\-all
+Set all signal dispositions (both standard & realtime) to ignore.
+
+.TP
+.BR \-\-ignore\-std\-all
+Set all standard signal dispositions to ignore.
+Does not modify realtime signals.
+
+.TP
+.BR \-\-ignore\-rt\-all
+Set all realtime signal dispositions to ignore.
+Does not modify standard signals.
+
+.TP
+.BR \-D ", " \-\-default " "\fIsigspec\fR
+Reset the signal disposition to its default.
+.br
+See
+.I SIG_DFL
+in
+.BR signal (2)
+for more details.
+
+.TP
+.BR \-\-default\-all
+Reset all signal dispositions (both standard & realtime) to their default.
+
+.TP
+.BR \-\-default\-std\-all
+Reset all standard signal dispositions to their default.
+Does not modify realtime signals.
+
+.TP
+.BR \-\-default\-rt\-all
+Reset all realtime signal dispositions to their default.
+Does not modify standard signals.
+
+.SS Signal set management (sigsetops(3)) options
+
+.TP
+.BR \-a ", " \-\-add " "\fIsigspec\fR
+Add
+.I sigspec
+to the current signal set.
+.br
+See
+.BR sigaddset (3)
+for more details.
+
+.TP
+.BR \-d ", " \-\-del " "\fIsigspec\fR
+Delete
+.I sigspec
+from the current signal set.
+.br
+See
+.BR sigdelset (3)
+for more details.
+
+.TP
+.BR \-e ", " \-\-empty
+Clear the current signal set.
+.br
+See
+.BR sigemptyset (3)
+for more details.
+
+.TP
+.BR \-f ", " \-\-fill
+Add all signals to the current signal set.
+.br
+See
+.BR sigfillset (3)
+for more details.
+
+.SS Signal set usage (sigprocmask(2)) options
+
+.TP
+.BR \-b ", " \-\-block
+Block the signals in the current signal set.
+Signals not in the signal set will not change.
+.br
+See
+.I SIG_BLOCK
+in
+.BR sigprocmask (2)
+for more details.
+
+.TP
+.BR \-\-block\-all
+Add all signals to the signal block mask.
+Does not modify or use the current signal set.
+.br
+A shortcut similar to
+.IR "\-\-fill \-\-block" .
+
+.TP
+.BR \-\-block\-all\-std
+Add all standard signals to the signal block mask.
+Does not modify or use the current signal set.
+
+.TP
+.BR \-\-block\-all\-rt
+Add all realtime signals to the signal block mask.
+Does not modify or use the current signal set.
+
+.TP
+.BR \-u ", " \-\-unblock
+Unblock the signals in the current signal set.
+Signals not in the signal set will not change.
+.br
+See
+.I SIG_UNBLOCK
+in
+.BR sigprocmask (2)
+for more details.
+
+.TP
+.BR \-\-unblock\-all
+Remove all signals from the signal block mask.
+Does not modify or use the current signal set.
+.br
+A shortcut similar to
+.IR "\-\-fill \-\-unblock" .
+
+.TP
+.BR \-\-unblock\-all\-std
+Remove all standard signals from the signal block mask.
+Does not modify or use the current signal set.
+
+.TP
+.BR \-\-unblock\-all\-rt
+Remove all realtime signals from the signal block mask.
+Does not modify or use the current signal set.
+
+.TP
+.BR \-s ", " \-\-set
+Block the signals in the current signal set, and unblock all signals not in the
+current signal set.
+.br
+See
+.I SIG_SETMASK
+in
+.BR sigprocmask (2)
+for more details.
+
+.SS Informational options
+
+.TP
+.BR \-\-show\-status
+Display current signal dispositions and the signal block mask.
+This is meant for debugging/testing purposes only, so its output is not stable.
+
+.TP
+.BR \-l ", " \-\-list
+List available/known symbolic signal names
+.RI "(" sigspecs ")"
+and exit.
+
+.TP
+.BR \-V ", " \-\-version
+Show version information and exit.
+
+.TP
+.BR \-h ", " \-\-help
+Show usage information and exit.
+
+.SH NOTES
+
+.SS Unblockable/unignorable signals
+There are a few signals that the OS might not allow you to modify.
+Most notably,
+.IR SIGKILL " and " SIGSTOP
+usually may not be blocked or ignored.
+There is nothing
+.B nosig
+(or any other program) can do to workaround this OS restriction.
+
+The OS will usually silently ignore requests to block them.
+.B nosig
+does not attempt to diagnose this for the user.
+
+The OS might return errors to ignore these signals, but
+.B nosig
+will silently ignore these errors by default too.
+
+This may also come up with the reserved realtime signals; see the next section
+for more details on those.
+
+.SS Reserved realtime signals
+The signals
+.BR SIGRTMIN " & " SIGRTMAX
+are not actually constant.
+Depending on the OS & runtime libraries, POSIX allows them to be dynamic.
+This allows the runtime to reserve a few signals for internal purposes.
+
+Notably, GNU C library (glibc)'s native POSIX threads library (pthreads/NPTL)
+will reserve two signals for its own internal use.
+The
+.BR nptl (7)
+man page goes into great detail here.
+
+.B nosig
+will not attempt to bypass these reservations.
+It rarely (if ever) makes sense to do so, and certainly the vast majority of
+users would never want such behavior, let alone inadvertently or as a default.
+If you really want to take over the reserved signals, you will need to write
+our own code/tools to do so.
+
+.SS Alternative signal dispositions
+It is not possible to change the signal behavior beyond ignore & the default
+disposition (i.e. make the signal trigger a
+.BR core (5)
+or have it stop).
+This is simply how signals work and isn't really something
+.B nosig
+can workaround.
+Doing so would require changes to the OS, or executing code in the process
+itself which would require unreliable hackery like
+.B LD_PRELOAD
+via
+.BR ld.so (8).
+
+.SS Locking signal settings
+.B nosig
+only initializes the signal settings before handing off control to the program.
+The program still has full control over its own runtime signal settings, thus
+it may completely reset all signal dispositions or the signal block mask.
+There is no way to workaround this (see the
+.B Alternative signal dispositions
+section for similar details).
+
+.SH EXAMPLES
+
+.SS Common uses
+.nf
+# Ignore a single signal like `nohup`!
+nosig --ignore SIGHUP <cmd>
+alias nohup='nosig --ignore SIGHUP --'
+
+# Ignore SIGINT (Ctrl-C) signals.
+nosig --ignore SIGINT <cmd>
+
+# Ignore SIGTSTP (Ctrl-Z) signals (i.e. background/suspend requests).
+nosig --ignore SIGTSTP <cmd>
+
+# Ignore SIGQUIT (Ctrl-\\) signals.
+nosig --ignore SIGQUIT <cmd>
+
+# Ignore all signals except for SIGINT (Ctrl-C).
+nosig --ignore-all --default SIGINT <cmd>
+
+# Ignore all signals.  The command can only be killed with SIGKILL (kill -9)!
+nosig --ignore-all <cmd>
+.fi
+
+.SS Advanced signal block mask uses
+NB: Manipulating the signal block mask is not common.
+Try the examples above first by ignoring signals.
+
+.nf
+# Block all signals.
+nosig --block-all <cmd>
+nosig --fill --block <cmd>
+
+# Unblock all signals.
+nosig --unblock-all <cmd>
+nosig --fill --unblock <cmd>
+
+# Block all signals except SIGUSR1.
+nosig --block-all --add USR1 --unblock <cmd>
+
+# Block all signals, but leave SIGUSR1 unchanged.
+nosig --fill --del SIGUSR1 --block <cmd>
+.fi
+
+.SH EXIT STATUS
+If
+.I program
+was executed, then the exit status will be of it.
+
+Otherwise:
+.br
+\(bu   0 An informational
+.B nosig
+option
+.RB "(e.g. " \-\-version ")"
+was handled.
+.br
+\(bu 125
+.B nosig
+itself exited.
+.br
+\(bu 126
+.I program
+was found, but could not be executed.
+.br
+\(bu 127
+.I program
+could not be found.
+
+.SH REPORTING BUGS
+Please report all bugs to the project page:
+.br
+https://github.com/vapier/nosig/issues
+
+.SH AUTHORS
+.nf
+Mike Frysinger <vapier@gmail.com>
+.fi
+
+.SH SEE ALSO
+.BR nohup (1),
+.BR sigaction (2),
+.BR signal (2),
+.BR sigprocmask (2),
+.BR sigsetops (3),
+.BR signal (7)

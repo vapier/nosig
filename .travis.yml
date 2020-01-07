@@ -1,0 +1,32 @@
+# Travis build integration.
+# https://docs.travis-ci.com/
+
+language: c
+
+matrix:
+  include:
+    - os: osx
+      compiler: clang
+
+    - os: linux
+      arch: amd64
+      compiler: clang
+    - os: linux
+      arch: amd64
+      compiler: gcc
+
+    - os: linux
+      arch: arm64
+      compiler: clang
+    - os: linux
+      arch: arm64
+      compiler: gcc
+
+    - os: linux
+      arch: s390x
+      compiler: clang
+    - os: linux
+      arch: s390x
+      compiler: gcc
+
+script: ./tests/travis.sh
