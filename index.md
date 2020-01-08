@@ -3,6 +3,8 @@
 A small utility akin to `nohup`: quickly set up the signal block mask & signal
 dispositions before executing another program.
 
+See the [man page](./man.md) for a lot more technical detail.
+
 ## Portability
 
 nosig should be usable on any recent POSIX compliant system.
