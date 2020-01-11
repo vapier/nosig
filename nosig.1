@@ -51,20 +51,20 @@ They might be useful as a fallback when dealing with a particularly stubborn
 program; see the
 .B Signal block mask management
 and
-.B Example
+.B Examples
 sections below for more details.
 
 .SS Resetting state
 .B nosig
 offers a bunch of options to quickly reset all signal state.
 Specifically,
-.I \-\-reset
+.B \-\-reset
 will reset all signal dispositions & block masks.
 This can help when trying to debug a setup where signals are being initialized
 incorrectly and you want to guarantee good state before running another tool.
 
 If you need a little more fine-grained selection, a variety of
-.I \-\-xxx\-all
+.B \-\-xxx\-all
 options are available.
 This way you don't have to verbosely list out every possible signal yourself.
 
@@ -106,7 +106,7 @@ The set of
 that
 .B nosig
 supports can be displayed with the
-.I \-\-list
+.B \-\-list
 option.
 
 .SS Standard vs realtime signals
@@ -315,7 +315,7 @@ Add all signals to the signal block mask.
 Does not modify or use the current signal set.
 .br
 A shortcut similar to
-.IR "\-\-fill \-\-block" .
+.BR "\-\-fill \-\-block" .
 
 .TP
 .BR \-\-block\-all\-std
@@ -344,7 +344,7 @@ Remove all signals from the signal block mask.
 Does not modify or use the current signal set.
 .br
 A shortcut similar to
-.IR "\-\-fill \-\-unblock" .
+.BR "\-\-fill \-\-unblock" .
 
 .TP
 .BR \-\-unblock\-all\-std
@@ -407,8 +407,9 @@ The OS might return errors to ignore these signals, but
 .B nosig
 will silently ignore these errors by default too.
 
-This may also come up with the reserved realtime signals; see the next section
-for more details on those.
+This may also come up with the reserved realtime signals; see the
+.B Reserved realtime signals
+section for more details on those.
 
 .SS Reserved realtime signals
 The signals
@@ -528,9 +529,7 @@ Please report all bugs to the project page:
 https://github.com/vapier/nosig/issues
 
 .SH AUTHORS
-.nf
 Mike Frysinger <vapier@gmail.com>
-.fi
 
 .SH SEE ALSO
 .BR nohup (1),
