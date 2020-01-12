@@ -367,6 +367,59 @@ in
 .BR sigprocmask (2)
 for more details.
 
+.SS Output options
+
+.TP
+.BR \-\-stdin " \fIpath\fR"
+Redirect input (stdin) from
+.IR path .
+The path will be opened for reading, and symlinks will be followed.
+This is a convenience option akin to shell redirects like `<path`.
+
+.TP
+.BR \-\-stdout " \fIpath\fR"
+Redirect stdout to
+.IR path .
+The path will be opened for writing, truncated, created if needed using mode
+0666 (respecting the user's
+.BR umask (2)),
+and symlinks followed.
+This is a convenience option akin to shell redirects like `>path`.
+
+.TP
+.BR \-\-stderr " \fIpath\fR"
+Redirect stderr to
+.IR path .
+The path will be opened for writing, truncated, created if needed using mode
+0666 (respecting the user's
+.BR umask (2)),
+and symlinks followed.
+This is a convenience option akin to shell redirects like `2>path`.
+
+.TP
+.BR \-\-output " \fIpath\fR"
+Redirect output (stdout & stderr) to
+.IR path .
+The path will be opened for writing, truncated, created if needed using mode
+0666 (respecting the user's
+.BR umask (2)),
+and symlinks followed.
+This is a convenience option akin to shell redirects like `>path 2>&1` or
+(the bashism) `>&path`.
+.br
+.br
+If you want to write stdout & stderr to the same path, make sure to use this
+rather than separate
+.I \-\-stdout
+and
+.I \-\-stderr
+options as those will truncate the same path and write over top of each other.
+
+.TP
+.BR \-\-null\-io
+Redirect input (stdin) from, and output (stdout & stderr) to,
+.IR /dev/null .
+
 .SS Informational options
 
 .TP

@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <err.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <getopt.h>
 #include <signal.h>
 #include <stdbool.h>
@@ -302,6 +303,28 @@ static void sigprocmask_range(int how, int first, int last)
 		warn("sigprocmask_range()");
 }
 
+/* Rebind |fd| to |path| using file |flags|. */
+static void redirect_io(int oldfd, const char *path, int flags)
+{
+	/* We use mode 666 to let umask apply. */
+	int newfd = open(path, flags, 0666);
+	if (newfd < 0)
+		err(EXIT_ERR, "could not open %s", path);
+	/* Pathological edge case: if newfd is already oldfd, do nothing. */
+	if (newfd != oldfd) {
+		if (dup2(newfd, oldfd) == -1)
+			err(EXIT_ERR, "could not dup to %i", oldfd);
+	}
+}
+static void redirect_input_from(const char *path)
+{
+	redirect_io(0, path, O_RDONLY);
+}
+static void redirect_output_to(int oldfd, const char *path)
+{
+	redirect_io(oldfd, path, O_WRONLY|O_CREAT);
+}
+
 /* Print all the known signals names to stdout. */
 ATTR_NORETURN
 static void list_signals(void)
@@ -413,6 +436,11 @@ enum {
 	OPT_UNBLOCK_ALL,
 	OPT_UNBLOCK_ALL_STD,
 	OPT_UNBLOCK_ALL_RT,
+	OPT_STDIN,
+	OPT_STDOUT,
+	OPT_STDERR,
+	OPT_OUTPUT,
+	OPT_NULL_IO,
 };
 static const struct option options[] = {
 	{"reset",             no_argument, NULL, OPT_RESET_ALL},
@@ -448,6 +476,12 @@ static const struct option options[] = {
 #if USE_RT
 	{"unblock-all-rt",    no_argument, NULL, OPT_UNBLOCK_ALL_RT},
 #endif
+
+	{"stdin",              a_argument, NULL, OPT_STDIN},
+	{"stdout",             a_argument, NULL, OPT_STDOUT},
+	{"stderr",             a_argument, NULL, OPT_STDERR},
+	{"output",             a_argument, NULL, OPT_OUTPUT},
+	{"null-io",           no_argument, NULL, OPT_NULL_IO},
 
 	{"verbose",           no_argument, NULL, 'v'},
 	{"show-status",       no_argument, NULL, OPT_SHOW_STATUS},
@@ -493,6 +527,12 @@ static const char * const help_text[] = {
 #if USE_RT
 	"Unblock all realtime signals (ignores current signal set)",
 #endif
+
+	"Redirect stdin from the specified path",
+	"Redirect stdout to the specified path",
+	"Redirect stderr to the specified path",
+	"Redirect stdout & stderr to the specified path",
+	"Redirect stdin/stdout/stderr to /dev/null",
 
 	"Display verbose internal nosig output",
 	"Display current signal settings (meant for debugging)",
@@ -663,6 +703,26 @@ int main(int argc, char *argv[])
 #endif
 		case OPT_DEFAULT_ALL:
 			set_sigaction_default_range(&sa, 1, get_sigmax());
+			break;
+
+		case OPT_STDIN:
+			redirect_input_from(optarg);
+			break;
+		case OPT_STDOUT:
+			redirect_output_to(1, optarg);
+			break;
+		case OPT_STDERR:
+			redirect_output_to(2, optarg);
+			break;
+		case OPT_OUTPUT:
+			redirect_output_to(1, optarg);
+			if (dup2(1, 2) == -1)
+				err(EXIT_ERR, "Could not dupe stdout to stderr");
+			break;
+		case OPT_NULL_IO:
+			redirect_input_from("/dev/null");
+			redirect_output_to(1, "/dev/null");
+			redirect_output_to(2, "/dev/null");
 			break;
 
 		case OPT_SHOW_STATUS:

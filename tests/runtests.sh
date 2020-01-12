@@ -341,5 +341,36 @@ check_exit ${sigret} --reset --ignore INT --default INT sh -c 'kill -INT $$; exi
 check_exit 2 --reset --ignore 2 sh -c 'kill -INT $$; exit 2'
 check_exit ${sigret} --reset --ignore 2 --default INT sh -c 'kill -INT $$; exit 2'
 
+: "### Check I/O redirection"
+echo foo >stdin-file
+out=$(nosig --stdin stdin-file cat)
+[ "${out}" = "foo" ]
+
+echo foo >stdout-file
+out=$(nosig --stdout stdout-file sh -c 'echo hi out; echo hi err >&2')
+[ -z "${out}" ]
+[ "$(cat stdout-file)" = "hi out" ]
+
+echo foo >stderr-file
+out=$(nosig --stderr stderr-file sh -c 'echo hi out; echo hi err >&2')
+[ "${out}" = "hi out" ]
+[ "$(cat stderr-file)" = "hi err" ]
+
+echo foo >stdout-file
+echo foo >stderr-file
+out=$(nosig --stdout stdout-file --stderr stderr-file sh -c 'echo hi out; echo hi err >&2')
+[ -z "${out}" ]
+[ "$(cat stdout-file)" = "hi out" ]
+[ "$(cat stderr-file)" = "hi err" ]
+
+echo foo >output-file
+out=$(nosig --output output-file sh -c 'echo hi out; echo hi err >&2')
+[ -z "${out}" ]
+[ "$(cat output-file)" = "hi out
+hi err" ]
+
+out=$(nosig --null-io sh -c 'echo hi out; echo hi err >&2; cat')
+[ -z "${out}" ]
+
 : "### All passed!"
 set +x
