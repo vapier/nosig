@@ -15,6 +15,7 @@
         options](#signal-set-management-sigsetops3-options)
       - [Signal set usage (sigprocmask(2))
         options](#signal-set-usage-sigprocmask2-options)
+      - [Output options](#output-options)
       - [Informational options](#informational-options)
   - [Notes](#notes)
       - [Unblockable/unignorable
@@ -330,6 +331,51 @@ signal block mask (e.g. **\-\-set**).
     See *SIG\_SETMASK* in
     [**sigprocmask**(2)](http://man7.org/linux/man-pages/man2/sigprocmask.2.html)
     for more details.
+
+### Output options
+
+  - **\-\-stdin** *path*  
+    Redirect input (stdin) from *path*. The path will be opened for
+    reading, and symlinks will be followed. This is a convenience option
+    akin to shell redirects like \`\<path\`.
+
+<!-- end list -->
+
+  - **\-\-stdout** *path*  
+    Redirect stdout to *path*. The path will be opened for writing,
+    truncated, created if needed using mode 0666 (respecting the user's
+    [**umask**(2)](http://man7.org/linux/man-pages/man2/umask.2.html)),
+    and symlinks followed. This is a convenience option akin to shell
+    redirects like \`\>path\`.
+
+<!-- end list -->
+
+  - **\-\-stderr** *path*  
+    Redirect stderr to *path*. The path will be opened for writing,
+    truncated, created if needed using mode 0666 (respecting the user's
+    [**umask**(2)](http://man7.org/linux/man-pages/man2/umask.2.html)),
+    and symlinks followed. This is a convenience option akin to shell
+    redirects like \`2\>path\`.
+
+<!-- end list -->
+
+  - **\-\-output** *path*  
+    Redirect output (stdout & stderr) to *path*. The path will be opened
+    for writing, truncated, created if needed using mode 0666
+    (respecting the user's
+    [**umask**(2)](http://man7.org/linux/man-pages/man2/umask.2.html)),
+    and symlinks followed. This is a convenience option akin to shell
+    redirects like \`\>path 2\>&1\` or (the bashism) \`\>\&path\`.  
+      
+    If you want to write stdout & stderr to the same path, make sure to
+    use this rather than separate *--stdout* and *--stderr* options as
+    those will truncate the same path and write over top of each other.
+
+<!-- end list -->
+
+  - **\-\-null\-io**  
+    Redirect input (stdin) from, and output (stdout & stderr) to,
+    */dev/null*.
 
 ### Informational options
 
