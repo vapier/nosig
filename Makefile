@@ -7,7 +7,7 @@ STDC = -std=c11 -D_XOPEN_SOURCE=700
 CFLAGS ?= -O2 -g
 CFLAGS += $(STDC) -Wall -Wextra
 
-VERSION := GIT
+VERSION := 2
 CPPFLAGS += -DVERSION='"$(VERSION)"'
 
 WERROR := -Werror
