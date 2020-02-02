@@ -325,6 +325,14 @@ static void redirect_output_to(int oldfd, const char *path)
 	redirect_io(oldfd, path, O_WRONLY|O_CREAT);
 }
 
+/* Print a single signal with consistent output format/alignment. */
+static void list_one_signal(const char *name, int value)
+{
+	/* 15 should be bigger than all signals we know about. */
+	const int signame_width = 15;
+	printf("%-*s %2i   %s\n", signame_width, name, value, strsignal(value));
+}
+
 /* Print all the known signals names to stdout. */
 ATTR_NORETURN
 static void list_signals(void)
@@ -332,16 +340,22 @@ static void list_signals(void)
 	size_t i;
 
 	for (i = 0; i < ARRAY_SIZE(signals); ++i)
-		printf("%s %i\n", signals[i].name, signals[i].value);
+		list_one_signal(signals[i].name, signals[i].value);
 
 #if USE_RT
-	printf("SIGRTMIN %i\n", SIGRTMIN);
-	for (i = 0; i <= (size_t)(SIGRTMAX - SIGRTMIN); ++i)
-		printf("SIGRTMIN+%zu %zu\n", i, SIGRTMIN + i);
+	list_one_signal("SIGRTMIN", SIGRTMIN);
+	for (i = 0; i <= (size_t)(SIGRTMAX - SIGRTMIN); ++i) {
+		static char signame[] = "SIGRTMIN+xx";
+		sprintf(&signame[9], "%zu", i);
+		list_one_signal(signame, SIGRTMIN + i);
+	}
 
-	printf("SIGRTMAX %i\n", SIGRTMAX);
-	for (i = 0; i <= (size_t)(SIGRTMAX - SIGRTMIN); ++i)
-		printf("SIGRTMAX-%zu %zu\n", i, SIGRTMAX - i);
+	list_one_signal("SIGRTMAX", SIGRTMAX);
+	for (i = 0; i <= (size_t)(SIGRTMAX - SIGRTMIN); ++i) {
+		static char signame[] = "SIGRTMAX+xx";
+		sprintf(&signame[9], "%zu", i);
+		list_one_signal(signame, SIGRTMAX - i);
+	}
 #endif
 
 	exit(EXIT_OK);
