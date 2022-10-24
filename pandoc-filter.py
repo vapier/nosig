@@ -8,16 +8,30 @@
 
 """Filter to improve the man->markdown conversion with pandoc.
 
-$ pandoc -r man -w gfm -F ./pandoc-filter.py -r man -w gfm nosig.1 > man.md
+Run with no options to run pandoc with the right settings.
 """
 
+import argparse
+from pathlib import Path
 import re
+import subprocess
+import sys
 
 from pandocfilters import *  # pylint: disable=wildcard-import,unused-wildcard-import
 
 
+DIR = Path(__file__).resolve().parent
+
 # Alias for stub attributes.
 NoAttrs = attributes({})
+
+
+def dbg(*args, **kwargs):
+    """Helper for quick printf-style debugging."""
+    assert 'file' not in kwargs
+    with open('/dev/tty', 'w') as fp:
+        kwargs['file'] = fp
+        print(*args, **kwargs)
 
 
 def ghanchor(text):
@@ -241,7 +255,8 @@ class GatherToc(ActionVisitor):
         self.append(level, text)
 
 
-if __name__ == '__main__':
+def pandoc_main(argv):
+    """Main func when script is run by pandoc as a filter."""
     gather_toc = GatherToc()
     toJSONFilters([
         AutoLinkUris(),
@@ -251,3 +266,24 @@ if __name__ == '__main__':
         AutoLinkSections(gather_toc),
         ConvertNameSectionToTitle(gather_toc),
     ])
+
+
+def user_main(argv):
+    """Main func when script is run by a user."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('man', default='man.1', nargs='?', help='man page to read')
+    parser.add_argument('md', default='man.md', nargs='?', help='markdown file to write')
+    opts = parser.parse_args(argv)
+
+    os.chdir(DIR)
+    cmd = ['pandoc', '-r', 'man', '-w', 'gfm', '-F', './pandoc-filter.py', opts.man]
+    print('Running:', ' '.join(cmd))
+    result = subprocess.run(cmd, check=True, stdout=subprocess.PIPE)
+    print('Updating', opts.md)
+    with open(opts.md, 'wb') as fp:
+        fp.write(result.stdout)
+
+
+if __name__ == '__main__':
+    main = user_main if sys.stdin.isatty() else pandoc_main
+    sys.exit(main(sys.argv[1:]))
