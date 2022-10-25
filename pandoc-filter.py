@@ -335,9 +335,24 @@ def user_main(argv):
     cmd = ['pandoc', '-r', 'man', '-w', 'gfm', '-F', './pandoc-filter.py', opts.man]
     print('Running:', ' '.join(cmd))
     result = subprocess.run(cmd, check=True, stdout=subprocess.PIPE)
+
     print('Updating', opts.md)
+    lines = result.stdout.splitlines(keepends=True)
+    # Strip out the <!-- --> markers in the generated TOC.  Ugly.
+    i = 1
+    while i < len(lines):
+        line = lines[i]
+        if line.startswith(b'#'):
+            break
+        if not line.strip() and lines[i + 1].strip() == b'<!-- -->':
+            lines.pop(i)
+            lines.pop(i)
+            if not lines[i].strip():
+                lines.pop(i)
+            continue
+        i += 1
     with open(opts.md, 'wb') as fp:
-        fp.write(result.stdout)
+        fp.writelines(lines)
 
 
 if __name__ == '__main__':
