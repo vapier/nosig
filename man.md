@@ -1,37 +1,30 @@
 # nosig(1): run a program with specified signals blocked
 
-  - [Synopsis](#synopsis)
-  - [Description](#description)
-      - [Resetting state](#resetting-state)
-      - [Signal specifications
-        (sigspec)](#signal-specifications-sigspec)
-      - [Standard vs realtime signals](#standard-vs-realtime-signals)
-      - [Signal block mask management](#signal-block-mask-management)
-  - [Options](#options)
-      - [Generic options](#generic-options)
-      - [Signal disposition (signal(2))
-        options](#signal-disposition-signal2-options)
-      - [Signal set management (sigsetops(3))
-        options](#signal-set-management-sigsetops3-options)
-      - [Signal set usage (sigprocmask(2))
-        options](#signal-set-usage-sigprocmask2-options)
-      - [Output options](#output-options)
-      - [Informational options](#informational-options)
-  - [Notes](#notes)
-      - [Unblockable/unignorable
-        signals](#unblockableunignorable-signals)
-      - [Reserved realtime signals](#reserved-realtime-signals)
-      - [Alternative signal
-        dispositions](#alternative-signal-dispositions)
-      - [Locking signal settings](#locking-signal-settings)
-  - [Examples](#examples)
-      - [Common uses](#common-uses)
-      - [Advanced signal block mask
-        uses](#advanced-signal-block-mask-uses)
-  - [Exit Status](#exit-status)
-  - [Reporting Bugs](#reporting-bugs)
-  - [Authors](#authors)
-  - [See Also](#see-also)
+- [Synopsis](#synopsis)
+- [Description](#description)
+  - [Resetting state](#resetting-state)
+  - [Signal specifications (sigspec)](#signal-specifications-sigspec)
+  - [Standard vs realtime signals](#standard-vs-realtime-signals)
+  - [Signal block mask management](#signal-block-mask-management)
+- [Options](#options)
+  - [Generic options](#generic-options)
+  - [Signal disposition (signal(2)) options](#signal-disposition-signal2-options)
+  - [Signal set management (sigsetops(3)) options](#signal-set-management-sigsetops3-options)
+  - [Signal set usage (sigprocmask(2)) options](#signal-set-usage-sigprocmask2-options)
+  - [Output options](#output-options)
+  - [Informational options](#informational-options)
+- [Notes](#notes)
+  - [Unblockable/unignorable signals](#unblockableunignorable-signals)
+  - [Reserved realtime signals](#reserved-realtime-signals)
+  - [Alternative signal dispositions](#alternative-signal-dispositions)
+  - [Locking signal settings](#locking-signal-settings)
+- [Examples](#examples)
+  - [Common uses](#common-uses)
+  - [Advanced signal block mask uses](#advanced-signal-block-mask-uses)
+- [Exit Status](#exit-status)
+- [Reporting Bugs](#reporting-bugs)
+- [Authors](#authors)
+- [See Also](#see-also)
 
 ## Synopsis
 
@@ -50,7 +43,7 @@ If you're familiar with the
 program, then **nosig** is like that but way more flexible. The
 equivalent to \`nohup ...\` is \`nosig --ignore SIGHUP ...\`. That is,
 [**nohup**(1)](http://man7.org/linux/man-pages/man1/nohup.1.html)
-ignores *SIGHUP* by setting its signal disposition to *SIG\_IGN* before
+ignores *SIGHUP* by setting its signal disposition to *SIG_IGN* before
 executing the specified program. It does not add the signal to the
 signal block mask.
 
@@ -67,8 +60,8 @@ including fully resetting signal dispositions or the signal block mask.
 Changing the signal block mask is a fairly advanced topic, and most
 users can skip over those options the vast majority of the time. They
 might be useful as a fallback when dealing with a particularly stubborn
-program; see the **[Signal block mask
-management](#signal-block-mask-management)** and
+program; see the
+**[Signal block mask management](#signal-block-mask-management)** and
 **[Examples](#examples)** sections below for more details.
 
 ### Resetting state
@@ -109,7 +102,7 @@ The set of *sigspecs* that **nosig** supports can be displayed with the
 ### Standard vs realtime signals
 
 If you're not familiar with realtime signals, then you most likely can
-completely ignore them\!
+completely ignore them!
 
 The signals users are most familiar with and utilize on a daily basis
 are the standard signals (or simply just "signals"). These have the
@@ -143,10 +136,10 @@ effectively "block a signal" for a program.
 
 If you have a program that registers a signal handler for a signal that
 you're trying to block, then attempts to use **\-\-ignore** will be
-overridden (see the **[Locking signal
-settings](#locking-signal-settings)** section below for more details).
-In that case, blocking the signal using the signal block mask might
-work.
+overridden (see the
+**[Locking signal settings](#locking-signal-settings)** section below
+for more details). In that case, blocking the signal using the signal
+block mask might work.
 
 The signal set options (**\-\-add**, **\-\-del**, **\-\-empty**,
 **\-\-fill**, **\-\-block**, **\-\-unblock**, **\-\-set**) operate on a
@@ -175,229 +168,177 @@ signal block mask (e.g. **\-\-set**).
 
 ### Generic options
 
-  - **\-\-reset**  
-    Unblock all signals and reset to their default dispositions.
+- **\-\-reset**  
+  Unblock all signals and reset to their default dispositions.
 
-<!-- end list -->
-
-  - **\-v**, **\-\-verbose**  
-    Display verbose output/warnings that are normally safe to ignore.
-    Specifying this more than once tends to make things more verbose.
+- **\-v**, **\-\-verbose**  
+  Display verbose output/warnings that are normally safe to ignore.
+  Specifying this more than once tends to make things more verbose.
 
 ### Signal disposition (signal(2)) options
 
-  - **\-I**, **\-\-ignore** ***sigspec***  
-    Set the signal disposition to ignore.  
-    See *SIG\_IGN* in
-    [**signal**(2)](http://man7.org/linux/man-pages/man2/signal.2.html)
-    for more details.
+- **\-I**, **\-\-ignore** ***sigspec***  
+  Set the signal disposition to ignore.  
+  See *SIG_IGN* in
+  [**signal**(2)](http://man7.org/linux/man-pages/man2/signal.2.html)
+  for more details.
 
-<!-- end list -->
+- **\-\-ignore\-all**  
+  Set all signal dispositions (both standard & realtime) to ignore.
 
-  - **\-\-ignore\-all**  
-    Set all signal dispositions (both standard & realtime) to ignore.
+- **\-\-ignore\-std\-all**  
+  Set all standard signal dispositions to ignore. Does not modify
+  realtime signals.
 
-<!-- end list -->
+- **\-\-ignore\-rt\-all**  
+  Set all realtime signal dispositions to ignore. Does not modify
+  standard signals.
 
-  - **\-\-ignore\-std\-all**  
-    Set all standard signal dispositions to ignore. Does not modify
-    realtime signals.
+- **\-D**, **\-\-default** ***sigspec***  
+  Reset the signal disposition to its default.  
+  See *SIG_DFL* in
+  [**signal**(2)](http://man7.org/linux/man-pages/man2/signal.2.html)
+  for more details.
 
-<!-- end list -->
+- **\-\-default\-all**  
+  Reset all signal dispositions (both standard & realtime) to their
+  default.
 
-  - **\-\-ignore\-rt\-all**  
-    Set all realtime signal dispositions to ignore. Does not modify
-    standard signals.
+- **\-\-default\-std\-all**  
+  Reset all standard signal dispositions to their default. Does not
+  modify realtime signals.
 
-<!-- end list -->
-
-  - **\-D**, **\-\-default** ***sigspec***  
-    Reset the signal disposition to its default.  
-    See *SIG\_DFL* in
-    [**signal**(2)](http://man7.org/linux/man-pages/man2/signal.2.html)
-    for more details.
-
-<!-- end list -->
-
-  - **\-\-default\-all**  
-    Reset all signal dispositions (both standard & realtime) to their
-    default.
-
-<!-- end list -->
-
-  - **\-\-default\-std\-all**  
-    Reset all standard signal dispositions to their default. Does not
-    modify realtime signals.
-
-<!-- end list -->
-
-  - **\-\-default\-rt\-all**  
-    Reset all realtime signal dispositions to their default. Does not
-    modify standard signals.
+- **\-\-default\-rt\-all**  
+  Reset all realtime signal dispositions to their default. Does not
+  modify standard signals.
 
 ### Signal set management (sigsetops(3)) options
 
-  - **\-a**, **\-\-add** ***sigspec***  
-    Add *sigspec* to the current signal set.  
-    See
-    [**sigaddset**(3)](http://man7.org/linux/man-pages/man3/sigaddset.3.html)
-    for more details.
+- **\-a**, **\-\-add** ***sigspec***  
+  Add *sigspec* to the current signal set.  
+  See
+  [**sigaddset**(3)](http://man7.org/linux/man-pages/man3/sigaddset.3.html)
+  for more details.
 
-<!-- end list -->
+- **\-d**, **\-\-del** ***sigspec***  
+  Delete *sigspec* from the current signal set.  
+  See
+  [**sigdelset**(3)](http://man7.org/linux/man-pages/man3/sigdelset.3.html)
+  for more details.
 
-  - **\-d**, **\-\-del** ***sigspec***  
-    Delete *sigspec* from the current signal set.  
-    See
-    [**sigdelset**(3)](http://man7.org/linux/man-pages/man3/sigdelset.3.html)
-    for more details.
+- **\-e**, **\-\-empty**  
+  Clear the current signal set.  
+  See
+  [**sigemptyset**(3)](http://man7.org/linux/man-pages/man3/sigemptyset.3.html)
+  for more details.
 
-<!-- end list -->
-
-  - **\-e**, **\-\-empty**  
-    Clear the current signal set.  
-    See
-    [**sigemptyset**(3)](http://man7.org/linux/man-pages/man3/sigemptyset.3.html)
-    for more details.
-
-<!-- end list -->
-
-  - **\-f**, **\-\-fill**  
-    Add all signals to the current signal set.  
-    See
-    [**sigfillset**(3)](http://man7.org/linux/man-pages/man3/sigfillset.3.html)
-    for more details.
+- **\-f**, **\-\-fill**  
+  Add all signals to the current signal set.  
+  See
+  [**sigfillset**(3)](http://man7.org/linux/man-pages/man3/sigfillset.3.html)
+  for more details.
 
 ### Signal set usage (sigprocmask(2)) options
 
-  - **\-b**, **\-\-block**  
-    Block the signals in the current signal set. Signals not in the
-    signal set will not change.  
-    See *SIG\_BLOCK* in
-    [**sigprocmask**(2)](http://man7.org/linux/man-pages/man2/sigprocmask.2.html)
-    for more details.
+- **\-b**, **\-\-block**  
+  Block the signals in the current signal set. Signals not in the signal
+  set will not change.  
+  See *SIG_BLOCK* in
+  [**sigprocmask**(2)](http://man7.org/linux/man-pages/man2/sigprocmask.2.html)
+  for more details.
 
-<!-- end list -->
+- **\-\-block\-all**  
+  Add all signals to the signal block mask. Does not modify or use the
+  current signal set.  
+  A shortcut similar to **\-\-fill \-\-block**.
 
-  - **\-\-block\-all**  
-    Add all signals to the signal block mask. Does not modify or use the
-    current signal set.  
-    A shortcut similar to **\-\-fill \-\-block**.
+- **\-\-block\-all\-std**  
+  Add all standard signals to the signal block mask. Does not modify or
+  use the current signal set.
 
-<!-- end list -->
+- **\-\-block\-all\-rt**  
+  Add all realtime signals to the signal block mask. Does not modify or
+  use the current signal set.
 
-  - **\-\-block\-all\-std**  
-    Add all standard signals to the signal block mask. Does not modify
-    or use the current signal set.
+- **\-u**, **\-\-unblock**  
+  Unblock the signals in the current signal set. Signals not in the
+  signal set will not change.  
+  See *SIG_UNBLOCK* in
+  [**sigprocmask**(2)](http://man7.org/linux/man-pages/man2/sigprocmask.2.html)
+  for more details.
 
-<!-- end list -->
+- **\-\-unblock\-all**  
+  Remove all signals from the signal block mask. Does not modify or use
+  the current signal set.  
+  A shortcut similar to **\-\-fill \-\-unblock**.
 
-  - **\-\-block\-all\-rt**  
-    Add all realtime signals to the signal block mask. Does not modify
-    or use the current signal set.
+- **\-\-unblock\-all\-std**  
+  Remove all standard signals from the signal block mask. Does not
+  modify or use the current signal set.
 
-<!-- end list -->
+- **\-\-unblock\-all\-rt**  
+  Remove all realtime signals from the signal block mask. Does not
+  modify or use the current signal set.
 
-  - **\-u**, **\-\-unblock**  
-    Unblock the signals in the current signal set. Signals not in the
-    signal set will not change.  
-    See *SIG\_UNBLOCK* in
-    [**sigprocmask**(2)](http://man7.org/linux/man-pages/man2/sigprocmask.2.html)
-    for more details.
-
-<!-- end list -->
-
-  - **\-\-unblock\-all**  
-    Remove all signals from the signal block mask. Does not modify or
-    use the current signal set.  
-    A shortcut similar to **\-\-fill \-\-unblock**.
-
-<!-- end list -->
-
-  - **\-\-unblock\-all\-std**  
-    Remove all standard signals from the signal block mask. Does not
-    modify or use the current signal set.
-
-<!-- end list -->
-
-  - **\-\-unblock\-all\-rt**  
-    Remove all realtime signals from the signal block mask. Does not
-    modify or use the current signal set.
-
-<!-- end list -->
-
-  - **\-s**, **\-\-set**  
-    Block the signals in the current signal set, and unblock all signals
-    not in the current signal set.  
-    See *SIG\_SETMASK* in
-    [**sigprocmask**(2)](http://man7.org/linux/man-pages/man2/sigprocmask.2.html)
-    for more details.
+- **\-s**, **\-\-set**  
+  Block the signals in the current signal set, and unblock all signals
+  not in the current signal set.  
+  See *SIG_SETMASK* in
+  [**sigprocmask**(2)](http://man7.org/linux/man-pages/man2/sigprocmask.2.html)
+  for more details.
 
 ### Output options
 
-  - **\-\-stdin** *path*  
-    Redirect input (stdin) from *path*. The path will be opened for
-    reading, and symlinks will be followed. This is a convenience option
-    akin to shell redirects like \`\<path\`.
+- **\-\-stdin** *path*  
+  Redirect input (stdin) from *path*. The path will be opened for
+  reading, and symlinks will be followed. This is a convenience option
+  akin to shell redirects like \`\<path\`.
 
-<!-- end list -->
+- **\-\-stdout** *path*  
+  Redirect stdout to *path*. The path will be opened for writing,
+  truncated, created if needed using mode 0666 (respecting the user's
+  [**umask**(2)](http://man7.org/linux/man-pages/man2/umask.2.html)),
+  and symlinks followed. This is a convenience option akin to shell
+  redirects like \`\>path\`.
 
-  - **\-\-stdout** *path*  
-    Redirect stdout to *path*. The path will be opened for writing,
-    truncated, created if needed using mode 0666 (respecting the user's
-    [**umask**(2)](http://man7.org/linux/man-pages/man2/umask.2.html)),
-    and symlinks followed. This is a convenience option akin to shell
-    redirects like \`\>path\`.
+- **\-\-stderr** *path*  
+  Redirect stderr to *path*. The path will be opened for writing,
+  truncated, created if needed using mode 0666 (respecting the user's
+  [**umask**(2)](http://man7.org/linux/man-pages/man2/umask.2.html)),
+  and symlinks followed. This is a convenience option akin to shell
+  redirects like \`2\>path\`.
 
-<!-- end list -->
+- **\-\-output** *path*  
+  Redirect output (stdout & stderr) to *path*. The path will be opened
+  for writing, truncated, created if needed using mode 0666 (respecting
+  the user's
+  [**umask**(2)](http://man7.org/linux/man-pages/man2/umask.2.html)),
+  and symlinks followed. This is a convenience option akin to shell
+  redirects like \`\>path 2\>&1\` or (the bashism) \`\>&path\`.  
+    
+  If you want to write stdout & stderr to the same path, make sure to
+  use this rather than separate *--stdout* and *--stderr* options as
+  those will truncate the same path and write over top of each other.
 
-  - **\-\-stderr** *path*  
-    Redirect stderr to *path*. The path will be opened for writing,
-    truncated, created if needed using mode 0666 (respecting the user's
-    [**umask**(2)](http://man7.org/linux/man-pages/man2/umask.2.html)),
-    and symlinks followed. This is a convenience option akin to shell
-    redirects like \`2\>path\`.
-
-<!-- end list -->
-
-  - **\-\-output** *path*  
-    Redirect output (stdout & stderr) to *path*. The path will be opened
-    for writing, truncated, created if needed using mode 0666
-    (respecting the user's
-    [**umask**(2)](http://man7.org/linux/man-pages/man2/umask.2.html)),
-    and symlinks followed. This is a convenience option akin to shell
-    redirects like \`\>path 2\>&1\` or (the bashism) \`\>\&path\`.  
-      
-    If you want to write stdout & stderr to the same path, make sure to
-    use this rather than separate *--stdout* and *--stderr* options as
-    those will truncate the same path and write over top of each other.
-
-<!-- end list -->
-
-  - **\-\-null\-io**  
-    Redirect input (stdin) from, and output (stdout & stderr) to,
-    */dev/null*.
+- **\-\-null\-io**  
+  Redirect input (stdin) from, and output (stdout & stderr) to,
+  */dev/null*.
 
 ### Informational options
 
-  - **\-\-show\-status**  
-    Display current signal dispositions and the signal block mask. This
-    is meant for debugging/testing purposes only, so its output is not
-    stable.
+- **\-\-show\-status**  
+  Display current signal dispositions and the signal block mask. This is
+  meant for debugging/testing purposes only, so its output is not
+  stable.
 
-<!-- end list -->
+- **\-l**, **\-\-list**  
+  List available/known symbolic signal names (*sigspecs*) and exit.
 
-  - **\-l**, **\-\-list**  
-    List available/known symbolic signal names (*sigspecs*) and exit.
+- **\-V**, **\-\-version**  
+  Show version information and exit.
 
-<!-- end list -->
-
-  - **\-V**, **\-\-version**  
-    Show version information and exit.
-
-<!-- end list -->
-
-  - **\-h**, **\-\-help**  
-    Show usage information and exit.
+- **\-h**, **\-\-help**  
+  Show usage information and exit.
 
 ## Notes
 
@@ -444,7 +385,7 @@ default disposition (i.e. make the signal trigger a
 it stop). This is simply how signals work and isn't really something
 **nosig** can workaround. Doing so would require changes to the OS, or
 executing code in the process itself which would require unreliable
-hackery like **LD\_PRELOAD** via
+hackery like **LD_PRELOAD** via
 [**ld.so**(8)](http://man7.org/linux/man-pages/man8/ld.so.8.html).
 
 ### Locking signal settings
@@ -453,9 +394,9 @@ hackery like **LD\_PRELOAD** via
 control to the program. The program still has full control over its own
 runtime signal settings, thus it may completely reset all signal
 dispositions or the signal block mask. There is no way to workaround
-this (see the **[Alternative signal
-dispositions](#alternative-signal-dispositions)** section for similar
-details).
+this (see the
+**[Alternative signal dispositions](#alternative-signal-dispositions)**
+section for similar details).
 
 ## Examples
 
