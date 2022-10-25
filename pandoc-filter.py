@@ -291,6 +291,23 @@ class GatherToc(ActionVisitor):
         self.append(level, text)
 
 
+class ConvertDefinitionList(ActionVisitor):
+    """Handle DefinitionList types.
+
+    Since pandoc itself doesn't currently do this, we have to.
+    https://github.com/jgm/pandoc/issues/1039
+    https://github.com/jgm/pandoc/issues/8394
+    """
+
+    def visit_definitionlist(str, key, value):
+        """Create a BulletList from the DefinitionList."""
+        bl = []
+        for (term, details) in value:
+            details[0][0]['c'][:] = term + [LineBreak()] + details[0][0]['c']
+            bl += details
+        return BulletList(bl)
+
+
 def pandoc_main(argv):
     """Main func when script is run by pandoc as a filter."""
     gather_toc = GatherToc()
@@ -299,6 +316,7 @@ def pandoc_main(argv):
         AutoLinkUris(),
         AutoLinkMans(),
         EscapeDashes(),
+        ConvertDefinitionList(),
         gather_toc,
         gather_name,
         AutoLinkSections(gather_toc),
