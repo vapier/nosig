@@ -140,27 +140,33 @@ class ConvertNameSectionToTitle(ActionVisitor):
 
     The .TH doesn't seem to be handled well, so we have to fake it.
     Plus the .SH NAME is a bit redundant.
+
+    Header
+     [1, ['', [], []], [{'c': 'NAME', 't': 'Str'}]]
+    Para
+     [{'c': 'nosig', 't': 'Str'}, {'t': 'Space'}, {'c': '-', 't': 'Str'},
+     {'t': 'Space'}, {'c': 'run', 't': 'Str'}, {'t': 'Space'},
+     {'c': 'a', 't': 'Str'}, {'t': 'Space'}, {'c': 'program', 't': 'Str'},
+     {'t': 'Space'}, {'c': 'with', 't': 'Str'}, {'t': 'Space'},
+     {'c': 'specified', 't': 'Str'}, {'t': 'Space'}, {'c': 'signals', 't': 'Str'},
+     {'t': 'Space'}, {'c': 'blocked', 't': 'Str'}]
     """
 
-    def __init__(self, get_toc):
-        self.header = None
+    def __init__(self, get_name, get_toc):
         self.done = False
+        self.get_name = get_name
         self.get_toc = get_toc
 
     def visit_header(self, key, value):
-        """Grab the first header.
-
-        We'll save a reference to the object so we can modify it later on.
-        """
-        if self.done or self.header:
+        """Grab the first header."""
+        if value[0] != 1:
             return
 
         # Sanity check this is the first header as we expect.
         assert value[0] == 1
         assert stringify(value[2]) == 'NAME'
 
-        self.header = Header(*value)
-        return self.header
+        return self.get_name.render()
 
     def visit_para(self, key, value):
         """Rewrite the into paragraph.
@@ -176,10 +182,40 @@ class ConvertNameSectionToTitle(ActionVisitor):
         eles.pop(1)
         text = ' '.join(eles)
         self.done = True
-        self.header['c'][2] = [Str(text)]
 
         # Replace the paragraph with the TOC.
         return self.get_toc.render()
+
+
+class GatherName(ActionVisitor):
+    """Find the first NAME section to turn into title for the whole page.
+
+    The .TH doesn't seem to be handled well, so we have to fake it.
+    Plus the .SH NAME is a bit redundant.
+
+    Header
+     [1, ['', [], []], [{'c': 'NAME', 't': 'Str'}]]
+    Para
+     [{'c': 'nosig', 't': 'Str'}, {'t': 'Space'}, {'c': '-', 't': 'Str'}, ...]
+    """
+
+    def __init__(self):
+        self.title = None
+
+    def render(self):
+        """Return the captured NAME section as a single string."""
+        return Header(1, NoAttrs, [Str(self.title)])
+
+    def visit_para(self, key, value):
+        """Assume the first paragraph is the NAME we want."""
+        if self.title:
+            return
+
+        # This turns "nosig - foo" into "nosig(1): foo" for the title.
+        eles = stringify(value).split()
+        eles[0] += '(1):'
+        eles.pop(1)
+        self.title = ' '.join(eles)
 
 
 class TocNode:
@@ -258,13 +294,15 @@ class GatherToc(ActionVisitor):
 def pandoc_main(argv):
     """Main func when script is run by pandoc as a filter."""
     gather_toc = GatherToc()
+    gather_name = GatherName()
     toJSONFilters([
         AutoLinkUris(),
         AutoLinkMans(),
         EscapeDashes(),
         gather_toc,
+        gather_name,
         AutoLinkSections(gather_toc),
-        ConvertNameSectionToTitle(gather_toc),
+        ConvertNameSectionToTitle(gather_name, gather_toc),
     ])
 
 
