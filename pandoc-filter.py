@@ -123,20 +123,6 @@ class AutoLinkSections(ActionVisitor):
             value[:] = [NewLink(text, ghanchor(text))]
 
 
-class EscapeDashes(ActionVisitor):
-    """Restore \- to dashes that pandoc currently strips.
-
-    https://github.com/jgm/pandoc/issues/6041
-    """
-
-    def visit_strong(self, key, value):
-        for i, ele in enumerate(value):
-            if ele['t'] == 'Str' and '--' in ele['c']:
-                # We have to escape all the things since we're forcing RawInline.
-                text = re.sub(r'([\[\]<>-])', r'\\\1', ele['c'])
-                value[i] = RawInline('markdown', text)
-
-
 class ConvertNameSectionToTitle(ActionVisitor):
     """Convert first NAME header to a title for the whole page.
 
@@ -317,7 +303,6 @@ def pandoc_main(argv):
     toJSONFilters([
         AutoLinkUris(),
         AutoLinkMans(),
-        EscapeDashes(),
         ConvertDefinitionList(),
         gather_toc,
         gather_name,
@@ -334,7 +319,7 @@ def user_main(argv):
     opts = parser.parse_args(argv)
 
     os.chdir(DIR)
-    cmd = ['pandoc', '-r', 'man', '-w', 'gfm', '-F', FILE.name, opts.man]
+    cmd = ['pandoc', '-r', 'man', '-w', 'gfm+smart', '-F', FILE.name, opts.man]
     print('Running:', ' '.join(cmd))
     result = subprocess.run(cmd, check=True, stdout=subprocess.PIPE)
 
