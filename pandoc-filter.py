@@ -84,8 +84,8 @@ class AutoLinkMans(ActionVisitor):
     """Automatically link references to other manpages."""
 
     @staticmethod
-    def linkman7(sect, page):
-        return "http://man7.org/linux/man-pages/man%(sect)s/%(page)s.%(sect)s.html" % {
+    def link_man7(sect, page):
+        return "https://man7.org/linux/man-pages/man%(sect)s/%(page)s.%(sect)s.html" % {
             "sect": sect,
             "page": page,
         }
@@ -104,7 +104,7 @@ class AutoLinkMans(ActionVisitor):
                             sect = m.group(1)
                             rem = m.group(2)
                             text = [Strong([Str(page)]), Str("(" + sect + ")")]
-                            url = self.linkman7(sect, page)
+                            url = self.link_man7(sect, page)
                             new_eles = [NewLink(text, url)]
                             if rem:
                                 new_eles.append(Str(rem))

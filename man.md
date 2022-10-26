@@ -39,10 +39,10 @@ the signal block mask. These are distinct settings, although most users
 will not care about the difference.
 
 If you\'re familiar with the
-[**nohup**(1)](http://man7.org/linux/man-pages/man1/nohup.1.html)
+[**nohup**(1)](https://man7.org/linux/man-pages/man1/nohup.1.html)
 program, then **nosig** is like that but way more flexible. The
 equivalent to \`nohup \...\` is \`nosig \--ignore SIGHUP \...\`. That
-is, [**nohup**(1)](http://man7.org/linux/man-pages/man1/nohup.1.html)
+is, [**nohup**(1)](https://man7.org/linux/man-pages/man1/nohup.1.html)
 ignores *SIGHUP* by setting its signal disposition to *SIG_IGN* before
 executing the specified program. It does not add the signal to the
 signal block mask.
@@ -180,7 +180,7 @@ block mask (e.g. **\--set**).
 - **-I**, **\--ignore** ***sigspec***  
   Set the signal disposition to ignore.  
   See *SIG_IGN* in
-  [**signal**(2)](http://man7.org/linux/man-pages/man2/signal.2.html)
+  [**signal**(2)](https://man7.org/linux/man-pages/man2/signal.2.html)
   for more details.
 
 - **\--ignore-all**  
@@ -197,7 +197,7 @@ block mask (e.g. **\--set**).
 - **-D**, **\--default** ***sigspec***  
   Reset the signal disposition to its default.  
   See *SIG_DFL* in
-  [**signal**(2)](http://man7.org/linux/man-pages/man2/signal.2.html)
+  [**signal**(2)](https://man7.org/linux/man-pages/man2/signal.2.html)
   for more details.
 
 - **\--default-all**  
@@ -217,25 +217,25 @@ block mask (e.g. **\--set**).
 - **-a**, **\--add** ***sigspec***  
   Add *sigspec* to the current signal set.  
   See
-  [**sigaddset**(3)](http://man7.org/linux/man-pages/man3/sigaddset.3.html)
+  [**sigaddset**(3)](https://man7.org/linux/man-pages/man3/sigaddset.3.html)
   for more details.
 
 - **-d**, **\--del** ***sigspec***  
   Delete *sigspec* from the current signal set.  
   See
-  [**sigdelset**(3)](http://man7.org/linux/man-pages/man3/sigdelset.3.html)
+  [**sigdelset**(3)](https://man7.org/linux/man-pages/man3/sigdelset.3.html)
   for more details.
 
 - **-e**, **\--empty**  
   Clear the current signal set.  
   See
-  [**sigemptyset**(3)](http://man7.org/linux/man-pages/man3/sigemptyset.3.html)
+  [**sigemptyset**(3)](https://man7.org/linux/man-pages/man3/sigemptyset.3.html)
   for more details.
 
 - **-f**, **\--fill**  
   Add all signals to the current signal set.  
   See
-  [**sigfillset**(3)](http://man7.org/linux/man-pages/man3/sigfillset.3.html)
+  [**sigfillset**(3)](https://man7.org/linux/man-pages/man3/sigfillset.3.html)
   for more details.
 
 ### Signal set usage (sigprocmask(2)) options
@@ -244,7 +244,7 @@ block mask (e.g. **\--set**).
   Block the signals in the current signal set. Signals not in the signal
   set will not change.  
   See *SIG_BLOCK* in
-  [**sigprocmask**(2)](http://man7.org/linux/man-pages/man2/sigprocmask.2.html)
+  [**sigprocmask**(2)](https://man7.org/linux/man-pages/man2/sigprocmask.2.html)
   for more details.
 
 - **\--block-all**  
@@ -264,7 +264,7 @@ block mask (e.g. **\--set**).
   Unblock the signals in the current signal set. Signals not in the
   signal set will not change.  
   See *SIG_UNBLOCK* in
-  [**sigprocmask**(2)](http://man7.org/linux/man-pages/man2/sigprocmask.2.html)
+  [**sigprocmask**(2)](https://man7.org/linux/man-pages/man2/sigprocmask.2.html)
   for more details.
 
 - **\--unblock-all**  
@@ -284,7 +284,7 @@ block mask (e.g. **\--set**).
   Block the signals in the current signal set, and unblock all signals
   not in the current signal set.  
   See *SIG_SETMASK* in
-  [**sigprocmask**(2)](http://man7.org/linux/man-pages/man2/sigprocmask.2.html)
+  [**sigprocmask**(2)](https://man7.org/linux/man-pages/man2/sigprocmask.2.html)
   for more details.
 
 ### Output options
@@ -297,14 +297,14 @@ block mask (e.g. **\--set**).
 - **\--stdout** *path*  
   Redirect stdout to *path*. The path will be opened for writing,
   truncated, created if needed using mode 0666 (respecting the user\'s
-  [**umask**(2)](http://man7.org/linux/man-pages/man2/umask.2.html)),
+  [**umask**(2)](https://man7.org/linux/man-pages/man2/umask.2.html)),
   and symlinks followed. This is a convenience option akin to shell
   redirects like \`\>path\`.
 
 - **\--stderr** *path*  
   Redirect stderr to *path*. The path will be opened for writing,
   truncated, created if needed using mode 0666 (respecting the user\'s
-  [**umask**(2)](http://man7.org/linux/man-pages/man2/umask.2.html)),
+  [**umask**(2)](https://man7.org/linux/man-pages/man2/umask.2.html)),
   and symlinks followed. This is a convenience option akin to shell
   redirects like \`2\>path\`.
 
@@ -312,7 +312,7 @@ block mask (e.g. **\--set**).
   Redirect output (stdout & stderr) to *path*. The path will be opened
   for writing, truncated, created if needed using mode 0666 (respecting
   the user\'s
-  [**umask**(2)](http://man7.org/linux/man-pages/man2/umask.2.html)),
+  [**umask**(2)](https://man7.org/linux/man-pages/man2/umask.2.html)),
   and symlinks followed. This is a convenience option akin to shell
   redirects like \`\>path 2\>&1\` or (the bashism) \`\>&path\`.  
     
@@ -368,8 +368,8 @@ purposes.
 
 Notably, GNU C library (glibc)\'s native POSIX threads library
 (pthreads/NPTL) will reserve two signals for its own internal use. The
-[**nptl**(7)](http://man7.org/linux/man-pages/man7/nptl.7.html) man page
-goes into great detail here.
+[**nptl**(7)](https://man7.org/linux/man-pages/man7/nptl.7.html) man
+page goes into great detail here.
 
 **nosig** will not attempt to bypass these reservations. It rarely (if
 ever) makes sense to do so, and certainly the vast majority of users
@@ -381,12 +381,12 @@ write our own code/tools to do so.
 
 It is not possible to change the signal behavior beyond ignore & the
 default disposition (i.e. make the signal trigger a
-[**core**(5)](http://man7.org/linux/man-pages/man5/core.5.html) or have
+[**core**(5)](https://man7.org/linux/man-pages/man5/core.5.html) or have
 it stop). This is simply how signals work and isn\'t really something
 **nosig** can workaround. Doing so would require changes to the OS, or
 executing code in the process itself which would require unreliable
 hackery like **LD_PRELOAD** via
-[**ld.so**(8)](http://man7.org/linux/man-pages/man8/ld.so.8.html).
+[**ld.so**(8)](https://man7.org/linux/man-pages/man8/ld.so.8.html).
 
 ### Locking signal settings
 
@@ -462,9 +462,9 @@ Mike Frysinger \<vapier@gmail.com\>
 
 ## See Also
 
-[**nohup**(1)](http://man7.org/linux/man-pages/man1/nohup.1.html),
-[**sigaction**(2)](http://man7.org/linux/man-pages/man2/sigaction.2.html),
-[**signal**(2)](http://man7.org/linux/man-pages/man2/signal.2.html),
-[**sigprocmask**(2)](http://man7.org/linux/man-pages/man2/sigprocmask.2.html),
-[**sigsetops**(3)](http://man7.org/linux/man-pages/man3/sigsetops.3.html),
-[**signal**(7)](http://man7.org/linux/man-pages/man7/signal.7.html)
+[**nohup**(1)](https://man7.org/linux/man-pages/man1/nohup.1.html),
+[**sigaction**(2)](https://man7.org/linux/man-pages/man2/sigaction.2.html),
+[**signal**(2)](https://man7.org/linux/man-pages/man2/signal.2.html),
+[**sigprocmask**(2)](https://man7.org/linux/man-pages/man2/sigprocmask.2.html),
+[**sigsetops**(3)](https://man7.org/linux/man-pages/man3/sigsetops.3.html),
+[**signal**(7)](https://man7.org/linux/man-pages/man7/signal.7.html)
