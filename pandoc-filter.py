@@ -29,15 +29,15 @@ NoAttrs = attributes({})
 
 def dbg(*args, **kwargs):
     """Helper for quick printf-style debugging."""
-    assert 'file' not in kwargs
-    with open('/dev/tty', 'w') as fp:
-        kwargs['file'] = fp
+    assert "file" not in kwargs
+    with open("/dev/tty", "w") as fp:
+        kwargs["file"] = fp
         print(*args, **kwargs)
 
 
 def ghanchor(text):
     """Generate anchor link that GitHub pages use."""
-    return '#' + re.sub(r'[()/]', '', text.lower().replace(' ', '-'))
+    return "#" + re.sub(r"[()/]", "", text.lower().replace(" ", "-"))
 
 
 def NewLink(text, url):
@@ -46,7 +46,7 @@ def NewLink(text, url):
         if not isinstance(text, dict):
             text = Str(text)
         text = [text]
-    return Link(NoAttrs, text, [url, ''])
+    return Link(NoAttrs, text, [url, ""])
 
 
 class ActionVisitor:
@@ -57,7 +57,7 @@ class ActionVisitor:
     """
 
     def __call__(self, key, value, format, meta):
-        method_name = 'visit_' + key.lower()
+        method_name = "visit_" + key.lower()
         func = getattr(self, method_name, None)
         if func:
             return func(key, value)
@@ -70,7 +70,7 @@ class AutoLinkUris(ActionVisitor):
         self.relinked = False
 
     def visit_str(self, key, value):
-        if value.startswith('http'):
+        if value.startswith("http"):
             # When we create a new Str node, we'll get called right away for it.
             # Ignore the next Str call with our content.
             if self.relinked == value:
@@ -85,30 +85,30 @@ class AutoLinkMans(ActionVisitor):
 
     @staticmethod
     def linkman7(sect, page):
-        return 'http://man7.org/linux/man-pages/man%(sect)s/%(page)s.%(sect)s.html' % {
-            'sect': sect,
-            'page': page,
+        return "http://man7.org/linux/man-pages/man%(sect)s/%(page)s.%(sect)s.html" % {
+            "sect": sect,
+            "page": page,
         }
 
     def visit_para(self, key, value):
         # NB: We use paragraphs because we need to look for consecutive nodes:
         # Strong(Str("nohup")) Str("(1)")
         for i, ele in enumerate(value):
-            if ele['t'] == 'Strong':
+            if ele["t"] == "Strong":
                 if i + 1 < len(value):
                     next_ele = value[i + 1]
-                    if next_ele['t'] == 'Str':
-                        m = re.match(r'\(([0-9])\)(.*)', next_ele['c'])
+                    if next_ele["t"] == "Str":
+                        m = re.match(r"\(([0-9])\)(.*)", next_ele["c"])
                         if m:
-                            page = ele['c'][0]['c']
+                            page = ele["c"][0]["c"]
                             sect = m.group(1)
                             rem = m.group(2)
-                            text = [Strong([Str(page)]), Str('(' + sect + ')')]
+                            text = [Strong([Str(page)]), Str("(" + sect + ")")]
                             url = self.linkman7(sect, page)
                             new_eles = [NewLink(text, url)]
                             if rem:
                                 new_eles.append(Str(rem))
-                            value[:] = value[0:i] + new_eles + value[i + 2:]
+                            value[:] = value[0:i] + new_eles + value[i + 2 :]
 
 
 class AutoLinkSections(ActionVisitor):
@@ -152,7 +152,7 @@ class ConvertNameSectionToTitle(ActionVisitor):
 
         # Sanity check this is the first header as we expect.
         assert value[0] == 1
-        assert stringify(value[2]) == 'NAME'
+        assert stringify(value[2]) == "NAME"
 
         return self.get_name.render()
 
@@ -166,9 +166,9 @@ class ConvertNameSectionToTitle(ActionVisitor):
 
         # This turns "nosig - foo" into "nosig(1): foo" for the title.
         eles = stringify(value).split()
-        eles[0] += '(1):'
+        eles[0] += "(1):"
         eles.pop(1)
-        text = ' '.join(eles)
+        text = " ".join(eles)
         self.done = True
 
         # Replace the paragraph with the TOC.
@@ -201,9 +201,9 @@ class GatherName(ActionVisitor):
 
         # This turns "nosig - foo" into "nosig(1): foo" for the title.
         eles = stringify(value).split()
-        eles[0] += '(1):'
+        eles[0] += "(1):"
         eles.pop(1)
-        self.title = ' '.join(eles)
+        self.title = " ".join(eles)
 
 
 class TocNode:
@@ -266,7 +266,7 @@ class GatherToc(ActionVisitor):
         text = stringify(text)
         # A bit of a hack: Skip the NAME header as we know we'll be rewriting
         # that into a title section and we don't want it in the TOC.
-        if text == 'NAME':
+        if text == "NAME":
             return
 
         value[0] = level = level + 1
@@ -291,7 +291,7 @@ class ConvertDefinitionList(ActionVisitor):
         """Create a BulletList from the DefinitionList."""
         bl = []
         for (term, details) in value:
-            details[0][0]['c'][:] = term + [LineBreak()] + details[0][0]['c']
+            details[0][0]["c"][:] = term + [LineBreak()] + details[0][0]["c"]
             bl += details
         return BulletList(bl)
 
@@ -300,48 +300,52 @@ def pandoc_main(argv):
     """Main func when script is run by pandoc as a filter."""
     gather_toc = GatherToc()
     gather_name = GatherName()
-    toJSONFilters([
-        AutoLinkUris(),
-        AutoLinkMans(),
-        ConvertDefinitionList(),
-        gather_toc,
-        gather_name,
-        AutoLinkSections(gather_toc),
-        ConvertNameSectionToTitle(gather_name, gather_toc),
-    ])
+    toJSONFilters(
+        [
+            AutoLinkUris(),
+            AutoLinkMans(),
+            ConvertDefinitionList(),
+            gather_toc,
+            gather_name,
+            AutoLinkSections(gather_toc),
+            ConvertNameSectionToTitle(gather_name, gather_toc),
+        ]
+    )
 
 
 def user_main(argv):
     """Main func when script is run by a user."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('man', default='man.1', nargs='?', help='man page to read')
-    parser.add_argument('md', default='man.md', nargs='?', help='markdown file to write')
+    parser.add_argument("man", default="man.1", nargs="?", help="man page to read")
+    parser.add_argument(
+        "md", default="man.md", nargs="?", help="markdown file to write"
+    )
     opts = parser.parse_args(argv)
 
     os.chdir(DIR)
-    cmd = ['pandoc', '-r', 'man', '-w', 'gfm+smart', '-F', FILE.name, opts.man]
-    print('Running:', ' '.join(cmd))
+    cmd = ["pandoc", "-r", "man", "-w", "gfm+smart", "-F", FILE.name, opts.man]
+    print("Running:", " ".join(cmd))
     result = subprocess.run(cmd, check=True, stdout=subprocess.PIPE)
 
-    print('Updating', opts.md)
+    print("Updating", opts.md)
     lines = result.stdout.splitlines(keepends=True)
     # Strip out the <!-- --> markers in the generated TOC.  Ugly.
     i = 1
     while i < len(lines):
         line = lines[i]
-        if line.startswith(b'#'):
+        if line.startswith(b"#"):
             break
-        if not line.strip() and lines[i + 1].strip() == b'<!-- -->':
+        if not line.strip() and lines[i + 1].strip() == b"<!-- -->":
             lines.pop(i)
             lines.pop(i)
             if not lines[i].strip():
                 lines.pop(i)
             continue
         i += 1
-    with open(opts.md, 'wb') as fp:
+    with open(opts.md, "wb") as fp:
         fp.writelines(lines)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main = user_main if sys.stdin.isatty() else pandoc_main
     sys.exit(main(sys.argv[1:]))
