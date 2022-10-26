@@ -171,13 +171,13 @@ signal block mask (e.g. **\-\-set**).
 - **\-\-reset**  
   Unblock all signals and reset to their default dispositions.
 
-- **\-v**, **\-\-verbose**  
+- **-v**, **\-\-verbose**  
   Display verbose output/warnings that are normally safe to ignore.
   Specifying this more than once tends to make things more verbose.
 
 ### Signal disposition (signal(2)) options
 
-- **\-I**, **\-\-ignore** ***sigspec***  
+- **-I**, **\-\-ignore** ***sigspec***  
   Set the signal disposition to ignore.  
   See *SIG_IGN* in
   [**signal**(2)](http://man7.org/linux/man-pages/man2/signal.2.html)
@@ -194,7 +194,7 @@ signal block mask (e.g. **\-\-set**).
   Set all realtime signal dispositions to ignore. Does not modify
   standard signals.
 
-- **\-D**, **\-\-default** ***sigspec***  
+- **-D**, **\-\-default** ***sigspec***  
   Reset the signal disposition to its default.  
   See *SIG_DFL* in
   [**signal**(2)](http://man7.org/linux/man-pages/man2/signal.2.html)
@@ -214,25 +214,25 @@ signal block mask (e.g. **\-\-set**).
 
 ### Signal set management (sigsetops(3)) options
 
-- **\-a**, **\-\-add** ***sigspec***  
+- **-a**, **\-\-add** ***sigspec***  
   Add *sigspec* to the current signal set.  
   See
   [**sigaddset**(3)](http://man7.org/linux/man-pages/man3/sigaddset.3.html)
   for more details.
 
-- **\-d**, **\-\-del** ***sigspec***  
+- **-d**, **\-\-del** ***sigspec***  
   Delete *sigspec* from the current signal set.  
   See
   [**sigdelset**(3)](http://man7.org/linux/man-pages/man3/sigdelset.3.html)
   for more details.
 
-- **\-e**, **\-\-empty**  
+- **-e**, **\-\-empty**  
   Clear the current signal set.  
   See
   [**sigemptyset**(3)](http://man7.org/linux/man-pages/man3/sigemptyset.3.html)
   for more details.
 
-- **\-f**, **\-\-fill**  
+- **-f**, **\-\-fill**  
   Add all signals to the current signal set.  
   See
   [**sigfillset**(3)](http://man7.org/linux/man-pages/man3/sigfillset.3.html)
@@ -240,7 +240,7 @@ signal block mask (e.g. **\-\-set**).
 
 ### Signal set usage (sigprocmask(2)) options
 
-- **\-b**, **\-\-block**  
+- **-b**, **\-\-block**  
   Block the signals in the current signal set. Signals not in the signal
   set will not change.  
   See *SIG_BLOCK* in
@@ -260,7 +260,7 @@ signal block mask (e.g. **\-\-set**).
   Add all realtime signals to the signal block mask. Does not modify or
   use the current signal set.
 
-- **\-u**, **\-\-unblock**  
+- **-u**, **\-\-unblock**  
   Unblock the signals in the current signal set. Signals not in the
   signal set will not change.  
   See *SIG_UNBLOCK* in
@@ -280,7 +280,7 @@ signal block mask (e.g. **\-\-set**).
   Remove all realtime signals from the signal block mask. Does not
   modify or use the current signal set.
 
-- **\-s**, **\-\-set**  
+- **-s**, **\-\-set**  
   Block the signals in the current signal set, and unblock all signals
   not in the current signal set.  
   See *SIG_SETMASK* in
@@ -331,13 +331,13 @@ signal block mask (e.g. **\-\-set**).
   meant for debugging/testing purposes only, so its output is not
   stable.
 
-- **\-l**, **\-\-list**  
+- **-l**, **\-\-list**  
   List available/known symbolic signal names (*sigspecs*) and exit.
 
-- **\-V**, **\-\-version**  
+- **-V**, **\-\-version**  
   Show version information and exit.
 
-- **\-h**, **\-\-help**  
+- **-h**, **\-\-help**  
   Show usage information and exit.
 
 ## Notes
@@ -405,19 +405,19 @@ section for similar details).
     # Ignore a single signal like `nohup`!
     nosig --ignore SIGHUP <cmd>
     alias nohup='nosig --ignore SIGHUP --'
-    
+
     # Ignore SIGINT (Ctrl-C) signals.
     nosig --ignore SIGINT <cmd>
-    
+
     # Ignore SIGTSTP (Ctrl-Z) signals (i.e. background/suspend requests).
     nosig --ignore SIGTSTP <cmd>
-    
+
     # Ignore SIGQUIT (Ctrl-\) signals.
     nosig --ignore SIGQUIT <cmd>
-    
+
     # Ignore all signals except for SIGINT (Ctrl-C).
     nosig --ignore-all --default SIGINT <cmd>
-    
+
     # Ignore all signals.  The command can only be killed with SIGKILL (kill -9)!
     nosig --ignore-all <cmd>
 
@@ -429,14 +429,14 @@ above first by ignoring signals.
     # Block all signals.
     nosig --block-all <cmd>
     nosig --fill --block <cmd>
-    
+
     # Unblock all signals.
     nosig --unblock-all <cmd>
     nosig --fill --unblock <cmd>
-    
+
     # Block all signals except SIGUSR1.
     nosig --block-all --add USR1 --unblock <cmd>
-    
+
     # Block all signals, but leave SIGUSR1 unchanged.
     nosig --fill --del SIGUSR1 --block <cmd>
 

@@ -20,7 +20,8 @@ import sys
 from pandocfilters import *  # pylint: disable=wildcard-import,unused-wildcard-import
 
 
-DIR = Path(__file__).resolve().parent
+FILE = Path(__file__).resolve()
+DIR = FILE.parent
 
 # Alias for stub attributes.
 NoAttrs = attributes({})
@@ -130,8 +131,9 @@ class EscapeDashes(ActionVisitor):
 
     def visit_strong(self, key, value):
         for i, ele in enumerate(value):
-            if ele['t'] == 'Str' and ele['c'].startswith('-'):
-                text = ele['c'].replace('-', r'\-')
+            if ele['t'] == 'Str' and '--' in ele['c']:
+                # We have to escape all the things since we're forcing RawInline.
+                text = re.sub(r'([\[\]<>-])', r'\\\1', ele['c'])
                 value[i] = RawInline('markdown', text)
 
 
@@ -332,7 +334,7 @@ def user_main(argv):
     opts = parser.parse_args(argv)
 
     os.chdir(DIR)
-    cmd = ['pandoc', '-r', 'man', '-w', 'gfm', '-F', './pandoc-filter.py', opts.man]
+    cmd = ['pandoc', '-r', 'man', '-w', 'gfm', '-F', FILE.name, opts.man]
     print('Running:', ' '.join(cmd))
     result = subprocess.run(cmd, check=True, stdout=subprocess.PIPE)
 
