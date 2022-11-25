@@ -30,9 +30,8 @@ NoAttrs = attributes({})
 def dbg(*args, **kwargs):
     """Helper for quick printf-style debugging."""
     assert "file" not in kwargs
-    with open("/dev/tty", "w") as fp:
-        kwargs["file"] = fp
-        print(*args, **kwargs)
+    kwargs["file"] = sys.stderr
+    print(*args, **kwargs)
 
 
 def ghanchor(text):
@@ -57,6 +56,11 @@ class ActionVisitor:
     """
 
     def __call__(self, key, value, format, meta):
+        # These aren't normally used, nor changed, so be lazy and pass them as
+        # properties rather than function arguments.
+        self.format = format
+        self.meta = meta
+
         method_name = "visit_" + key.lower()
         func = getattr(self, method_name, None)
         if func:
@@ -164,11 +168,6 @@ class ConvertNameSectionToTitle(ActionVisitor):
         if self.done:
             return
 
-        # This turns "nosig - foo" into "nosig(1): foo" for the title.
-        eles = stringify(value).split()
-        eles[0] += "(1):"
-        eles.pop(1)
-        text = " ".join(eles)
         self.done = True
 
         # Replace the paragraph with the TOC.
@@ -199,9 +198,13 @@ class GatherName(ActionVisitor):
         if self.title:
             return
 
+        # This will be a normal node:
+        # {'t': 'MetaInlines', 'c': [{'t': 'Str', 'c': '5'}]}
+        section = self.meta["section"]["c"][0]["c"]
+
         # This turns "nosig - foo" into "nosig(1): foo" for the title.
         eles = stringify(value).split()
-        eles[0] += "(1):"
+        eles[0] += f"({section}):"
         eles.pop(1)
         self.title = " ".join(eles)
 
